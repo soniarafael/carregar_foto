@@ -33,16 +33,16 @@
         }
 
         h3 {
-            margin-top: 33vh;
-            font-family: "Script-MT", serif;
-            font-size: 20px;
+            margin-top: 33vh; /* Adiciona espaçamento do topo */
+            font-family: "Script-MT", serif; /* Define a nova fonte */
+            font-size: 20px; /* Ajusta o tamanho da fonte */
             color: #627951;
         }
 
         h5 {
             margin-top: 20px;
             margin-bottom: 20px;
-            font-family: "Script-MT", serif;
+            font-family: "Script-MT", serif; /* Define a nova fonte */
             color: #7e9a7b;
         }
 
@@ -57,25 +57,29 @@
             color: #3b5110;
         }
 
+        /* Estilo para o botão customizado */
         .custom-file-input {
             padding: 12px 20px;
             font-size: 16px;
             cursor: pointer;
             border: none;
-            background-color: #4CAF50;
-            color: white;
+            background-color: #e2e8e2;; /* Cor de fundo */
+            color: #3b5110; /* Cor do texto */
             border-radius: 5px;
         }
 
+        /* Esconde o input de tipo file, mas ainda funciona */
         #fileInput {
             display: none;
         }
 
+        /* Exibe a quantidade de arquivos selecionados */
         #fileCount {
-            font-size: 16px;
+            font-size: 12px;
             margin-top: 10px;
             color: #7e9a7b;
         }
+
     </style>
 </head>
 <body>
@@ -84,13 +88,19 @@
     <h5>O dia é nosso, mas as memórias são de todos! Envia as tuas fotos para que possamos reviver cada momento!</h5>
     <p></p>
 
+    <!-- Botão personalizado para acionar o seletor de arquivos -->
     <button class="custom-file-input" onclick="document.getElementById('fileInput').click()">Escolher Ficheiros</button>
+
+    <!-- Input de arquivo oculto -->
     <input type="file" id="fileInput" multiple onchange="updateFileCount()">
+
+    <!-- Exibe a quantidade de arquivos selecionados -->
     <div id="fileCount">Nenhum arquivo selecionado.</div>
+
     <button onclick="uploadFiles()">Enviar</button>
 
     <script>
-        // Função para atualizar a quantidade de arquivos selecionados
+        // Função para atualizar o contador de arquivos selecionados
         function updateFileCount() {
             const fileInput = document.getElementById("fileInput");
             const fileCount = fileInput.files.length;
@@ -100,7 +110,6 @@
             document.getElementById("fileCount").innerText = fileCountText;
         }
 
-        // Função para enviar os arquivos ao Google Apps Script
         async function uploadFiles() {
             const fileInput = document.getElementById("fileInput");
             if (fileInput.files.length === 0) {
@@ -111,14 +120,13 @@
             let filesArray = [];
             const promises = [];
 
-            // Converte os arquivos em base64 e os prepara para envio
             for (const file of fileInput.files) {
                 const reader = new FileReader();
                 
                 const filePromise = new Promise((resolve) => {
                     reader.onloadend = function () {
                         filesArray.push({
-                            file: reader.result.split(",")[1], // Remove o cabeçalho da base64
+                            file: reader.result.split(",")[1],
                             fileName: file.name,
                             mimeType: file.type
                         });
@@ -130,7 +138,6 @@
                 promises.push(filePromise);
             }
 
-            // Espera a conversão dos arquivos para base64
             await Promise.all(promises);
 
             try {
@@ -143,20 +150,12 @@
                     headers: { "Content-Type": "application/x-www-form-urlencoded" }
                 });
 
-                // Verificando se a resposta não está vazia antes de tentar fazer o parse
-                const textResponse = await response.text();
-                try {
-                    const result = JSON.parse(textResponse); // Convertendo a resposta para JSON
-                    if (result.success) {
-                        alert("Enviado com sucesso, obrigado! 🙏");
-                    } else {
-                        alert("Erro: " + result.message);
-                    }
-                } catch (jsonError) {
-                    console.error("Erro ao tentar parsear JSON", jsonError);
-                    alert("Erro ao processar a resposta do servidor.");
+                const result = await response.json();
+                if (result.success) {
+                    alert("Enviado com sucesso, obrigado! 🙏");
+                } else {
+                    alert("Erro: " + result.message);
                 }
-
             } catch (error) {
                 console.error("Erro no upload:", error);
                 alert("Erro ao enviar os arquivos.");
