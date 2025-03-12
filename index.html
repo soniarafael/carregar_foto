@@ -3,104 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Envio de Arquivos para o Google Drive</title>
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://apis.google.com/js/platform.js"></script>
+    <title>Enviar fotos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-image: url('https://i.imgur.com/z3HHHBM.jpg');
+            background-size: 100% 100%;
+            background-position: center center;
+            background-repeat: no-repeat;
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            text-align: center;
+            color: #8FBC8F;
+            font-family: Arial, sans-serif;
+        }
+
+        h3 {
+            margin-top: 33vh; /* Adiciona espaçamento do topo */
+            font-family: "Script-MT", serif; /* Define a nova fonte */
+            font-size: 20px; /* Ajusta o tamanho da fonte */
+            color: #627951;
+        }
+
+        h5 {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-family: "Script-MT", serif; /* Define a nova fonte */
+            color: #7e9a7b;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #e2e8e2;
+            color: #3b5110;
+        }
+
+        /* Estilo para o botão customizado */
+        .custom-file-input {
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            background-color: #e2e8e2;; /* Cor de fundo */
+            color: #3b5110; /* Cor do texto */
+            border-radius: 5px;
+        }
+
+        /* Esconde o input de tipo file, mas ainda funciona */
+        #fileInput {
+            display: none;
+        }
+
+        /* Exibe a quantidade de arquivos selecionados */
+        #fileCount {
+            font-size: 12px;
+            margin-top: 10px;
+            color: #7e9a7b;
+        }
+
+    </style>
 </head>
 <body>
-    <h2>Escolha Imagens ou Vídeos para Enviar ao Google Drive</h2>
-    
-    <!-- Botão de Autorização -->
-    <button id="authorize_button" style="display: none;" onclick="handleAuthClick()">Autorizar</button>
+    <h3>Partilha connosco a magia deste dia!</h3>
+    <p></p>
+    <h5>O dia é nosso, mas as memórias são de todos! Envia as tuas fotos para que possamos reviver cada momento!</h5>
+    <p></p>
 
-    <!-- Botão de Envio de Arquivo -->
-    <button id="upload_button" style="display: none;" onclick="uploadFile()">Enviar Arquivo</button>
+    <!-- Botão personalizado para acionar o seletor de arquivos -->
+    <button class="custom-file-input" onclick="document.getElementById('fileInput').click()">Escolher Ficheiros</button>
 
-    <!-- Input de Seleção de Arquivos -->
-    <input type="file" id="fileInput" multiple accept="image/*,video/*">
+    <!-- Input de arquivo oculto -->
+    <input type="file" id="fileInput" multiple onchange="updateFileCount()">
+
+    <!-- Exibe a quantidade de arquivos selecionados -->
+    <div id="fileCount">Nenhum arquivo selecionado.</div>
+
+    <button onclick="uploadFiles()">Enviar</button>
 
     <script>
-        const CLIENT_ID = '268910905388-of8s4kn83obp1h7dus6k4hj9h0dpehnv.apps.googleusercontent.com'; // Substitua com o seu Client ID OAuth 2.0
-        const API_KEY = 'AIzaSyCbR_Qz8ijrNrhexu-G19zdgHwOWd4R2lc'; // Substitua com a sua API Key
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-
-        let accessToken = '';
-
-        // Carrega a API do Google Drive
-        function loadClient() {
-            gapi.client.setApiKey(API_KEY);
-            gapi.client.load("https://content.googleapis.com/discovery/v1/apis/drive/v3/rest").then(() => {
-                gapi.auth2.init({
-                    client_id: CLIENT_ID,
-                    scope: SCOPES
-                }).then(() => {
-                    checkAuth();
-                });
-            });
+        // Função para atualizar o contador de arquivos selecionados
+        function updateFileCount() {
+            const fileInput = document.getElementById("fileInput");
+            const fileCount = fileInput.files.length;
+            const fileCountText = fileCount === 0 
+                ? "Nenhum arquivo selecionado."
+                : `${fileCount} arquivo(s) selecionado(s).`;
+            document.getElementById("fileCount").innerText = fileCountText;
         }
 
-        // Verifica se o usuário está autenticado
-        function checkAuth() {
-            const authInstance = gapi.auth2.getAuthInstance();
-            if (authInstance.isSignedIn.get()) {
-                document.getElementById("authorize_button").style.display = "none";
-                document.getElementById("upload_button").style.display = "inline-block";
-                document.getElementById("fileInput").style.display = "inline-block";
-            } else {
-                document.getElementById("authorize_button").style.display = "inline-block";
-                document.getElementById("upload_button").style.display = "none";
-                document.getElementById("fileInput").style.display = "none";
-            }
-        }
-
-        // Realiza o login e autorização
-        function handleAuthClick() {
-            gapi.auth2.getAuthInstance().signIn().then(() => {
-                accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
-                checkAuth();
-            });
-        }
-
-        // Função para enviar arquivos ao Google Drive
-        function uploadFile() {
+        async function uploadFiles() {
             const fileInput = document.getElementById("fileInput");
             if (fileInput.files.length === 0) {
                 alert("Selecione pelo menos um arquivo!");
                 return;
             }
 
+            let filesArray = [];
+            const promises = [];
+
             for (const file of fileInput.files) {
-                const metadata = {
-                    name: file.name,
-                    mimeType: file.type
-                };
-
-                const form = new FormData();
-                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-                form.append('file', file);
-
-                fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
-                    method: 'POST',
-                    headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
-                    body: form
-                }).then((response) => response.json()).then((data) => {
-                    if (data.id) {
-                        alert("Arquivo enviado com sucesso!");
-                    } else {
-                        alert("Erro ao enviar arquivo.");
-                    }
-                }).catch((error) => {
-                    console.error('Erro no upload:', error);
-                    alert("Erro ao enviar o arquivo.");
+                const reader = new FileReader();
+                
+                const filePromise = new Promise((resolve) => {
+                    reader.onloadend = function () {
+                        filesArray.push({
+                            file: reader.result.split(",")[1],
+                            fileName: file.name,
+                            mimeType: file.type
+                        });
+                        resolve();
+                    };
                 });
+
+                reader.readAsDataURL(file);
+                promises.push(filePromise);
+            }
+
+            await Promise.all(promises);
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append("files", JSON.stringify(filesArray));
+
+                const response = await fetch("https://script.google.com/macros/s/AKfycbztxR8cagAPPIQ4x-6e9j1e0FEFd6TYSCHAv8qNjJ2txWehbleCuTfn8dU7HljVQgy2/exec", {
+                    method: "POST",
+                    body: formData,
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert("Enviado com sucesso, obrigado! 🙏");
+                } else {
+                    alert("Erro: " + result.message);
+                }
+            } catch (error) {
+                console.error("Erro no upload:", error);
+                alert("Erro ao enviar os arquivos.");
             }
         }
-
-        function start() {
-            gapi.load('client:auth2', loadClient);
-        }
-
-        start();
     </script>
 </body>
 </html>
