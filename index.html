@@ -143,12 +143,20 @@
                     headers: { "Content-Type": "application/x-www-form-urlencoded" }
                 });
 
-                const result = await response.json();
-                if (result.success) {
-                    alert("Enviado com sucesso, obrigado! 🙏");
-                } else {
-                    alert("Erro: " + result.message);
+                // Verificando se a resposta não está vazia antes de tentar fazer o parse
+                const textResponse = await response.text();
+                try {
+                    const result = JSON.parse(textResponse); // Convertendo a resposta para JSON
+                    if (result.success) {
+                        alert("Enviado com sucesso, obrigado! 🙏");
+                    } else {
+                        alert("Erro: " + result.message);
+                    }
+                } catch (jsonError) {
+                    console.error("Erro ao tentar parsear JSON", jsonError);
+                    alert("Erro ao processar a resposta do servidor.");
                 }
+
             } catch (error) {
                 console.error("Erro no upload:", error);
                 alert("Erro ao enviar os arquivos.");
