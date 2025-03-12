@@ -33,16 +33,16 @@
         }
 
         h3 {
-            margin-top: 33vh; /* Adiciona espaçamento do topo */
-            font-family: "Script-MT", serif; /* Define a nova fonte */
-            font-size: 20px; /* Ajusta o tamanho da fonte */
+            margin-top: 33vh;
+            font-family: "Script-MT", serif;
+            font-size: 20px;
             color: #627951;
         }
 
         h5 {
             margin-top: 20px;
             margin-bottom: 20px;
-            font-family: "Script-MT", serif; /* Define a nova fonte */
+            font-family: "Script-MT", serif;
             color: #7e9a7b;
         }
 
@@ -63,23 +63,20 @@
             font-size: 16px;
             cursor: pointer;
             border: none;
-            background-color: #e2e8e2;; /* Cor de fundo */
-            color: #3b5110; /* Cor do texto */
+            background-color: #4CAF50;
+            color: white;
             border-radius: 5px;
         }
 
-        /* Esconde o input de tipo file, mas ainda funciona */
         #fileInput {
             display: none;
         }
 
-        /* Exibe a quantidade de arquivos selecionados */
         #fileCount {
-            font-size: 12px;
+            font-size: 16px;
             margin-top: 10px;
             color: #7e9a7b;
         }
-
     </style>
 </head>
 <body>
@@ -88,19 +85,12 @@
     <h5>O dia é nosso, mas as memórias são de todos! Envia as tuas fotos para que possamos reviver cada momento!</h5>
     <p></p>
 
-    <!-- Botão personalizado para acionar o seletor de arquivos -->
     <button class="custom-file-input" onclick="document.getElementById('fileInput').click()">Escolher Ficheiros</button>
-
-    <!-- Input de arquivo oculto -->
     <input type="file" id="fileInput" multiple onchange="updateFileCount()">
-
-    <!-- Exibe a quantidade de arquivos selecionados -->
     <div id="fileCount">Nenhum arquivo selecionado.</div>
-
     <button onclick="uploadFiles()">Enviar</button>
 
     <script>
-        // Função para atualizar o contador de arquivos selecionados
         function updateFileCount() {
             const fileInput = document.getElementById("fileInput");
             const fileCount = fileInput.files.length;
@@ -117,37 +107,15 @@
                 return;
             }
 
-            let filesArray = [];
-            const promises = [];
-
+            const formData = new FormData();
             for (const file of fileInput.files) {
-                const reader = new FileReader();
-                
-                const filePromise = new Promise((resolve) => {
-                    reader.onloadend = function () {
-                        filesArray.push({
-                            file: reader.result.split(",")[1],
-                            fileName: file.name,
-                            mimeType: file.type
-                        });
-                        resolve();
-                    };
-                });
-
-                reader.readAsDataURL(file);
-                promises.push(filePromise);
+                formData.append("files", file);
             }
 
-            await Promise.all(promises);
-
             try {
-                const formData = new URLSearchParams();
-                formData.append("files", JSON.stringify(filesArray));
-
                 const response = await fetch("https://script.google.com/macros/s/AKfycbztxR8cagAPPIQ4x-6e9j1e0FEFd6TYSCHAv8qNjJ2txWehbleCuTfn8dU7HljVQgy2/exec", {
                     method: "POST",
                     body: formData,
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
                 });
 
                 const result = await response.json();
