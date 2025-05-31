@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Enviar fotos</title>
     <style>
         * {
@@ -84,7 +84,7 @@
     <h5>O dia é nosso, mas as memórias são de todos! Envia as tuas fotos para que possamos reviver cada momento!</h5>
 
     <button class="custom-file-input" onclick="document.getElementById('fileInput').click()">Escolher Ficheiros</button>
-    <input type="file" id="fileInput" multiple onchange="updateFileCount()">
+    <input type="file" id="fileInput" multiple onchange="updateFileCount()" />
     <div id="fileCount">Nenhum arquivo selecionado.</div>
 
     <button onclick="uploadFiles()">Enviar</button>
@@ -106,39 +106,20 @@
                 return;
             }
 
-            let filesArray = [];
-            const promises = [];
-
+            const formData = new FormData();
             for (const file of fileInput.files) {
-                const reader = new FileReader();
-                const filePromise = new Promise((resolve) => {
-                    reader.onloadend = function () {
-                        filesArray.push({
-                            file: reader.result.split(",")[1],
-                            fileName: file.name,
-                            mimeType: file.type
-                        });
-                        resolve();
-                    };
-                });
-
-                reader.readAsDataURL(file);
-                promises.push(filePromise);
+                formData.append('files', file, file.name);
             }
 
-            await Promise.all(promises);
-
             try {
-                const formData = new URLSearchParams();
-                formData.append("files", JSON.stringify(filesArray));
-
                 const response = await fetch("https://script.google.com/macros/s/AKfycbztxR8cagAPPIQ4x-6e9j1e0FEFd6TYSCHAv8qNjJ2txWehbleCuTfn8dU7HljVQgy2/exec", {
                     method: "POST",
-                    body: formData,
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
+                    body: formData
+                    // NÃO precisa definir header 'Content-Type', o fetch define para multipart/form-data automaticamente
                 });
 
                 const result = await response.json();
+
                 if (result.success) {
                     alert("Enviado com sucesso, obrigado! 🙏");
                 } else {
