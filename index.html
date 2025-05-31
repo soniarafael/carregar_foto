@@ -106,7 +106,7 @@
     await Promise.all(promises);
 
     try {
-      const response = await fetch("https://script.google.com/macros/s/AKfycbxZJKQk6b4-ZL8k6EVE22nxBnwSmq-WZdq6_I6az7Vu1DFZSAkCyqEtqrybZuKooiGu/exec", {
+      const response = await fetch("https://script.google.com/macros/s/AKfycby1WvVVmEui8hpaixk8tauf2jhDJEDQjuQqC3ebJM-tChn5ntJkkHm4Yamq4fsusojY/exec", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ files: filesArray })
@@ -124,7 +124,8 @@
       }
     } catch (error) {
       console.error("Erro no upload:", error);
-      alert("Erro ao enviar os arquivos.");
+      alert("Erro ao enviar os arquivos: " + error.message);
+      console.error("Erro detalhado:", error);
     }
   }
 </script>
