@@ -89,66 +89,66 @@
 
     <button onclick="uploadFiles()">Enviar</button>
 
-    <script>
-        function updateFileCount() {
-            const fileInput = document.getElementById("fileInput");
-            const fileCount = fileInput.files.length;
-            const fileCountText = fileCount === 0 
-                ? "Nenhum arquivo selecionado."
-                : `${fileCount} arquivo(s) selecionado(s).`;
-            document.getElementById("fileCount").innerText = fileCountText;
+   <script>
+    function updateFileCount() {
+        const fileInput = document.getElementById("fileInput");
+        const fileCount = fileInput.files.length;
+        const fileCountText = fileCount === 0 
+            ? "Nenhum arquivo selecionado."
+            : `${fileCount} arquivo(s) selecionado(s).`;
+        document.getElementById("fileCount").innerText = fileCountText;
+    }
+
+    async function uploadFiles() {
+        const fileInput = document.getElementById("fileInput");
+        if (fileInput.files.length === 0) {
+            alert("Selecione pelo menos um arquivo!");
+            return;
         }
 
-        async function uploadFiles() {
-            const fileInput = document.getElementById("fileInput");
-            if (fileInput.files.length === 0) {
-                alert("Selecione pelo menos um arquivo!");
-                return;
-            }
+        let filesArray = [];
+        const promises = [];
 
-            let filesArray = [];
-            const promises = [];
-
-            for (const file of fileInput.files) {
-                const reader = new FileReader();
-                const filePromise = new Promise((resolve) => {
-                    reader.onloadend = function () {
-                        filesArray.push({
-                            file: reader.result.split(",")[1],
-                            fileName: file.name,
-                            mimeType: file.type
-                        });
-                        resolve();
-                    };
-                });
-
-                reader.readAsDataURL(file);
-                promises.push(filePromise);
-            }
-
-            await Promise.all(promises);
-
-            try {
-                const formData = new URLSearchParams();
-                formData.append("files", JSON.stringify(filesArray));
-
-                const response = await fetch("https://script.google.com/macros/s/AKfycbzsgsDdzOLwB3vFXqjwSK9ivSoB1aa19ZewodBIm93U-gA6wUxhdBZRT28fzGusz_qj/exec", {
-                    method: "POST",
-                    body: formData,
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" }
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    alert("Enviado com sucesso, obrigado! 🙏");
-                } else {
-                    alert("Erro: " + result.message);
-                }
-            } catch (error) {
-                console.error("Erro no upload:", error);
-                alert("Erro ao enviar os arquivos.");
-            }
+        for (const file of fileInput.files) {
+            const reader = new FileReader();
+            const filePromise = new Promise((resolve) => {
+                reader.onloadend = function () {
+                    filesArray.push({
+                        file: reader.result.split(",")[1],
+                        fileName: file.name,
+                        mimeType: file.type
+                    });
+                    resolve();
+                };
+            });
+            reader.readAsDataURL(file);
+            promises.push(filePromise);
         }
-    </script>
+
+        await Promise.all(promises);
+
+        try {
+            const formData = new URLSearchParams();
+            formData.append("files", JSON.stringify(filesArray));
+
+            const response = await fetch("https://script.google.com/macros/s/AKfycbzsgsDdzOLwB3vFXqjwSK9ivSoB1aa19ZewodBIm93U-gA6wUxhdBZRT28fzGusz_qj/exec", {
+                method: "POST",
+                body: formData,
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert("Enviado com sucesso, obrigado! 🙏");
+            } else {
+                alert("Erro: " + result.message);
+            }
+        } catch (error) {
+            console.error("Erro no upload:", error);
+            alert("Erro ao enviar os arquivos: " + error.message);
+        }
+    }
+</script>
+
 </body>
 </html> 
