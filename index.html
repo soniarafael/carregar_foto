@@ -71,63 +71,64 @@
 <button onclick="uploadFiles()">Enviar</button>
 
 <script>
-  function updateFileCount() {
-    const fileInput = document.getElementById("fileInput");
-    const count = fileInput.files.length;
-    document.getElementById("fileCount").innerText = count === 0 ? "Nenhum arquivo selecionado." : `${count} arquivo(s) selecionado(s).`;
-  }
+    async function uploadFiles() {
+        const fileInput = document.getElementById("fileInput");
+        if (fileInput.files.length === 0) {
+            alert("Selecione pelo menos um arquivo!");
+            return;
+        }
 
-  async function uploadFiles() {
-    const fileInput = document.getElementById("fileInput");
-    if (fileInput.files.length === 0) {
-      alert("Selecione pelo menos um arquivo!");
-      return;
+        let filesArray = [];
+        const promises = [];
+
+        for (const file of fileInput.files) {
+            const reader = new FileReader();
+            const filePromise = new Promise((resolve, reject) => {
+                reader.onloadend = () => {
+                    filesArray.push({
+                        file: reader.result.split(",")[1],
+                        fileName: file.name,
+                        mimeType: file.type
+                    });
+                    resolve();
+                };
+                reader.onerror = () => {
+                    reject(new Error("Erro ao ler arquivo: " + file.name));
+                };
+            });
+            reader.readAsDataURL(file);
+            promises.push(filePromise);
+        }
+
+        try {
+            await Promise.all(promises);
+
+            const response = await fetch("https://script.google.com/macros/s/AKfycby9OlMtoSJl1lQpHZkc1fKFCvbIWuJYicx5m7IKur3RttClB4QqbFo7UWooll2Nuu1R/exec", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ files: filesArray })
+            });
+
+            if (!response.ok) {
+                throw new Error("Resposta HTTP não OK, status: " + response.status);
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("Enviado com sucesso, obrigado! 🙏");
+            } else {
+                alert("Erro no servidor: " + result.message);
+            }
+
+        } catch (error) {
+            console.error("Erro detalhado no upload:", error);
+            alert("Erro ao enviar os arquivos: " + error.message);
+        }
     }
-
-    let filesArray = [];
-    const promises = [];
-
-    for (const file of fileInput.files) {
-      const reader = new FileReader();
-      const promise = new Promise((resolve) => {
-        reader.onloadend = () => {
-          filesArray.push({
-            file: reader.result.split(",")[1], // só base64
-            fileName: file.name,
-            mimeType: file.type
-          });
-          resolve();
-        };
-      });
-      reader.readAsDataURL(file);
-      promises.push(promise);
-    }
-
-    await Promise.all(promises);
-
-    try {
-      const response = await fetch("https://script.google.com/macros/s/AKfycby1WvVVmEui8hpaixk8tauf2jhDJEDQjuQqC3ebJM-tChn5ntJkkHm4Yamq4fsusojY/exec", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ files: filesArray })
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        alert("Enviado com sucesso, obrigado! 🙏");
-        // opcional: limpar seleção e contador
-        fileInput.value = "";
-        updateFileCount();
-      } else {
-        alert("Erro: " + result.message);
-      }
-    } catch (error) {
-      console.error("Erro no upload:", error);
-      alert("Erro ao enviar os arquivos: " + error.message);
-      console.error("Erro detalhado:", error);
-    }
-  }
 </script>
+
 </body>
 </html>
