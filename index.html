@@ -156,11 +156,6 @@
     <button class="btn" onclick="uploadFiles()">Enviar</button>
   </div>
 
-  <a href="https://maps.app.goo.gl/h6VFCTKcbbGj65i46" target="_blank">
-    <i class="fas fa-map-marker-alt location-icon"></i>
-  </a>
-  <p class="location-text">Quinta da Praia Verde</p>
-
   <script>
     function updateFileCount() {
       const fileInput = document.getElementById("fileInput");
@@ -215,7 +210,7 @@
         try {
           const result = JSON.parse(textResponse);
           if (result.success) {
-            alert("Enviado com sucesso, obrigado! 🙏");
+            alert("Enviado com sucesso, obrigado! 🤍");
           } else {
             alert("Erro: " + result.message);
           }
