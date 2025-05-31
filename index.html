@@ -1,157 +1,132 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enviar fotos</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        body {
-            background-image: url('https://i.imgur.com/XFFoblA.jpeg');
-            background-size: cover;
-            background-position: center center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            color: #8FBC8F;
-            font-family: Arial, sans-serif;
-        }
-
-        h3 {
-            font-family: "Snell Roundhand", cursive;
-            font-size: 20px;
-            color: white;
-            margin-bottom: 10px;
-        }
-
-        h5 {
-            margin: 10px 20px;
-            font-family: "Snell Roundhand", cursive;
-            color: white;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 14px;
-            margin: 10px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            background-color: #e2e8e2;
-            color: #3b5110;
-        }
-
-        .custom-file-input {
-            padding: 12px 20px;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            background-color: #e2e8e2;
-            color: #3b5110;
-            border-radius: 5px;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        #fileCount {
-            font-size: 12px;
-            margin-top: 10px;
-            color: #7e9a7b;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Enviar fotos</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+  body {
+    background-image: url('https://i.imgur.com/XFFoblA.jpeg');
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #8FBC8F;
+    font-family: Arial, sans-serif;
+  }
+  h3 {
+    font-family: "Snell Roundhand", cursive;
+    font-size: 20px;
+    color: white;
+    margin-bottom: 10px;
+  }
+  h5 {
+    margin: 10px 20px;
+    font-family: "Snell Roundhand", cursive;
+    color: white;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 14px;
+    margin: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: rgba(226, 232, 226, 0.8);
+    color: #3b5110;
+  }
+  .custom-file-input {
+    padding: 12px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    background-color: rgba(226, 232, 226, 0.8);
+    color: #3b5110;
+    border-radius: 5px;
+  }
+  #fileInput { display: none; }
+  #fileCount {
+    font-size: 12px;
+    margin-top: 10px;
+    color: #7e9a7b;
+  }
+</style>
 </head>
 <body>
-    <h3>Partilha connosco a magia deste dia!</h3>
-    <h5>O dia é nosso, mas as memórias são de todos! Envia as tuas fotos para que possamos reviver cada momento!</h5>
+<h3>Partilha connosco a magia deste dia!</h3>
+<h5>O dia é nosso, mas as memórias são de todos! Envia as tuas fotos para que possamos reviver cada momento!</h5>
 
-    <button class="custom-file-input" onclick="document.getElementById('fileInput').click()">Escolher Ficheiros</button>
-    <input type="file" id="fileInput" multiple onchange="updateFileCount()">
-    <div id="fileCount">Nenhum arquivo selecionado.</div>
+<button class="custom-file-input" onclick="document.getElementById('fileInput').click()">Escolher Ficheiros</button>
+<input type="file" id="fileInput" multiple onchange="updateFileCount()" />
+<div id="fileCount">Nenhum arquivo selecionado.</div>
 
-    <button onclick="uploadFiles()">Enviar</button>
+<button onclick="uploadFiles()">Enviar</button>
 
-   <script>
-    function updateFileCount() {
-        const fileInput = document.getElementById("fileInput");
-        const fileCount = fileInput.files.length;
-        const fileCountText = fileCount === 0 
-            ? "Nenhum arquivo selecionado."
-            : `${fileCount} arquivo(s) selecionado(s).`;
-        document.getElementById("fileCount").innerText = fileCountText;
+<script>
+  function updateFileCount() {
+    const fileInput = document.getElementById("fileInput");
+    const count = fileInput.files.length;
+    document.getElementById("fileCount").innerText = count === 0 ? "Nenhum arquivo selecionado." : `${count} arquivo(s) selecionado(s).`;
+  }
+
+  async function uploadFiles() {
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput.files.length === 0) {
+      alert("Selecione pelo menos um arquivo!");
+      return;
     }
 
-    async function uploadFiles() {
-        const fileInput = document.getElementById("fileInput");
-        if (fileInput.files.length === 0) {
-            alert("Selecione pelo menos um arquivo!");
-            return;
-        }
+    let filesArray = [];
+    const promises = [];
 
-        let filesArray = [];
-        const promises = [];
-
-        for (const file of fileInput.files) {
-            const reader = new FileReader();
-            const filePromise = new Promise((resolve) => {
-                reader.onloadend = function () {
-                    filesArray.push({
-                        file: reader.result.split(",")[1],
-                        fileName: file.name,
-                        mimeType: file.type
-                    });
-                    resolve();
-                };
-            });
-            reader.readAsDataURL(file);
-            promises.push(filePromise);
-        }
-
-        await Promise.all(promises);
-
-        try {
-            const formData = new URLSearchParams();
-            formData.append("files", JSON.stringify(filesArray));
-
-            const response = await fetch("https://script.google.com/macros/s/AKfycbyxsnC24aevnhIFYrNgRgOtcgc9h2hm-j9X3L7eWeQB4gp8L9fnZGx25R-op1r_8M5K/exec", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({ files: filesArray })
-            });
-
-
-            const result = await response.json();
-            if (result.success) {
-                alert("Enviado com sucesso, obrigado! 🙏");
-            } else {
-                alert("Erro: " + result.message);
-            }
-        } catch (error) {
-            console.error("Erro no upload:", error);
-            alert("Erro ao enviar os arquivos: " + error.message);
-        }
+    for (const file of fileInput.files) {
+      const reader = new FileReader();
+      const promise = new Promise((resolve) => {
+        reader.onloadend = () => {
+          filesArray.push({
+            file: reader.result.split(",")[1], // só base64
+            fileName: file.name,
+            mimeType: file.type
+          });
+          resolve();
+        };
+      });
+      reader.readAsDataURL(file);
+      promises.push(promise);
     }
+
+    await Promise.all(promises);
+
+    try {
+      const response = await fetch("https://script.google.com/macros/s/AKfycbxZJKQk6b4-ZL8k6EVE22nxBnwSmq-WZdq6_I6az7Vu1DFZSAkCyqEtqrybZuKooiGu/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ files: filesArray })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Enviado com sucesso, obrigado! 🙏");
+        // opcional: limpar seleção e contador
+        fileInput.value = "";
+        updateFileCount();
+      } else {
+        alert("Erro: " + result.message);
+      }
+    } catch (error) {
+      console.error("Erro no upload:", error);
+      alert("Erro ao enviar os arquivos.");
+    }
+  }
 </script>
-
 </body>
-</html> 
+</html>
