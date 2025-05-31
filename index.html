@@ -95,7 +95,7 @@
             const fileCount = fileInput.files.length;
             const fileCountText = fileCount === 0 
                 ? "Nenhum arquivo selecionado."
-                : ${fileCount} arquivo(s) selecionado(s).;
+                : `${fileCount} arquivo(s) selecionado(s).`;
             document.getElementById("fileCount").innerText = fileCountText;
         }
 
@@ -132,7 +132,7 @@
                 const formData = new URLSearchParams();
                 formData.append("files", JSON.stringify(filesArray));
 
-                const response = await fetch("https://script.google.com/macros/s/AKfycbzzfSBr9WPgJ8sM9rhFQ8aKsdnXzzzVXk0FeBz3_4jgCCKBrpslTk_0ps92eLCeTVbC/exec", {
+                const response = await fetch("https://script.google.com/macros/s/AKfycbzsgsDdzOLwB3vFXqjwSK9ivSoB1aa19ZewodBIm93U-gA6wUxhdBZRT28fzGusz_qj/exec", {
                     method: "POST",
                     body: formData,
                     headers: { "Content-Type": "application/x-www-form-urlencoded" }
