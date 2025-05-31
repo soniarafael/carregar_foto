@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enviar fotos</title>
     <style>
         * {
@@ -15,41 +15,40 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;
         }
 
         body {
             background-image: url('https://i.imgur.com/XFFoblA.jpeg');
-            background-size: cover;
+            background-size: 100% 100%;
             background-position: center center;
-            background-attachment: fixed;
             background-repeat: no-repeat;
+            height: 100%;
             width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
             text-align: center;
             color: #8FBC8F;
             font-family: Arial, sans-serif;
         }
 
         h3 {
-            font-family: "Snell Roundhand", cursive;
+            margin-top: 33vh;
+            font-family: "Script-MT", serif;
             font-size: 20px;
-            color: white;
-            margin-bottom: 10px;
+            color: #627951;
         }
 
         h5 {
-            margin: 10px 20px;
-            font-family: "Snell Roundhand", cursive;
-            color: white;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-family: "Script-MT", serif;
+            color: #7e9a7b;
         }
 
         button {
             padding: 10px 20px;
-            font-size: 14px;
+            font-size: 16px;
             margin: 10px;
             cursor: pointer;
             border: none;
@@ -60,11 +59,11 @@
 
         .custom-file-input {
             padding: 12px 20px;
-            font-size: 14px;
+            font-size: 16px;
             cursor: pointer;
             border: none;
-            background-color: #e2e8e2;
-            color: #3b5110;
+            background-color: #4CAF50;
+            color: white;
             border-radius: 5px;
         }
 
@@ -73,7 +72,7 @@
         }
 
         #fileCount {
-            font-size: 12px;
+            font-size: 16px;
             margin-top: 10px;
             color: #7e9a7b;
         }
@@ -81,15 +80,17 @@
 </head>
 <body>
     <h3>Partilha connosco a magia deste dia!</h3>
+    <p></p>
     <h5>O dia é nosso, mas as memórias são de todos! Envia as tuas fotos para que possamos reviver cada momento!</h5>
+    <p></p>
 
     <button class="custom-file-input" onclick="document.getElementById('fileInput').click()">Escolher Ficheiros</button>
-    <input type="file" id="fileInput" multiple onchange="updateFileCount()" />
+    <input type="file" id="fileInput" multiple onchange="updateFileCount()">
     <div id="fileCount">Nenhum arquivo selecionado.</div>
-
     <button onclick="uploadFiles()">Enviar</button>
 
     <script>
+        // Função para atualizar a quantidade de arquivos selecionados
         function updateFileCount() {
             const fileInput = document.getElementById("fileInput");
             const fileCount = fileInput.files.length;
@@ -99,6 +100,7 @@
             document.getElementById("fileCount").innerText = fileCountText;
         }
 
+        // Função para enviar os arquivos ao Google Apps Script
         async function uploadFiles() {
             const fileInput = document.getElementById("fileInput");
             if (fileInput.files.length === 0) {
@@ -109,20 +111,18 @@
             let filesArray = [];
             const promises = [];
 
+            // Converte os arquivos em base64 e os prepara para envio
             for (const file of fileInput.files) {
                 const reader = new FileReader();
-                const filePromise = new Promise((resolve, reject) => {
-                    reader.onloadend = () => {
+                
+                const filePromise = new Promise((resolve) => {
+                    reader.onloadend = function () {
                         filesArray.push({
-                            file: reader.result.split(",")[1], // base64 sem prefixo
+                            file: reader.result.split(",")[1], // Remove o cabeçalho da base64
                             fileName: file.name,
                             mimeType: file.type
                         });
                         resolve();
-                    };
-                    reader.onerror = (e) => {
-                        console.error("Erro no FileReader para o arquivo:", file.name, e);
-                        reject(new Error("Erro ao ler arquivo: " + file.name));
                     };
                 });
 
@@ -130,28 +130,36 @@
                 promises.push(filePromise);
             }
 
-            try {
-                await Promise.all(promises);
+            // Espera a conversão dos arquivos para base64
+            await Promise.all(promises);
 
+            try {
                 const formData = new URLSearchParams();
                 formData.append("files", JSON.stringify(filesArray));
 
-                const response = await fetch("https://script.google.com/macros/s/AKfycby9OlMtoSJl1lQpHZkc1fKFCvbIWuJYicx5m7IKur3RttClB4QqbFo7UWooll2Nuu1R/exec", {
+                const response = await fetch("https://script.google.com/macros/s/AKfycbzW6gF-0IBi1_lZZSQW44uuAMujiDPEwhQtufHY8Fe430XNsqT_4oVuiWXe0n0BMznq/exec", {
                     method: "POST",
                     body: formData,
                     headers: { "Content-Type": "application/x-www-form-urlencoded" }
                 });
 
-                const result = await response.json();
-
-                if (result.success) {
-                    alert("Enviado com sucesso, obrigado! 🙏");
-                } else {
-                    alert("Erro: " + result.message);
+                // Verificando se a resposta não está vazia antes de tentar fazer o parse
+                const textResponse = await response.text();
+                try {
+                    const result = JSON.parse(textResponse); // Convertendo a resposta para JSON
+                    if (result.success) {
+                        alert("Enviado com sucesso, obrigado! 🙏");
+                    } else {
+                        alert("Erro: " + result.message);
+                    }
+                } catch (jsonError) {
+                    console.error("Erro ao tentar parsear JSON", jsonError);
+                    alert("Erro ao processar a resposta do servidor.");
                 }
+
             } catch (error) {
                 console.error("Erro no upload:", error);
-                alert("Erro ao enviar os arquivos: " + error.message);
+                alert("Erro ao enviar os arquivos.");
             }
         }
     </script>
