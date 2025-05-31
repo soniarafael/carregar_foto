@@ -15,6 +15,7 @@
             height: 100%;
             margin: 0;
             padding: 0;
+            overflow: hidden;
         }
 
         body {
@@ -23,28 +24,27 @@
             background-position: center center;
             background-attachment: fixed;
             background-repeat: no-repeat;
-            height: 100%;
             width: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
             color: #8FBC8F;
             font-family: Arial, sans-serif;
         }
 
         h3 {
-            margin-top: 33vh; /* Adiciona espaçamento do topo */
-            font-family: "Snell Roundhand", cursive; /* Define a nova fonte */
-            font-size: 20px; /* Ajusta o tamanho da fonte */
-            color: white /*#6279517*/;
+            font-family: "Snell Roundhand", cursive;
+            font-size: 20px;
+            color: white;
+            margin-bottom: 10px;
         }
 
         h5 {
-            margin-top: 20px;
-            margin-bottom: 20px;
-            font-family: "Snell Roundhand", cursive; /* Define a nova fonte */
-            color: white /*#7e9a7b*/;
+            margin: 10px 20px;
+            font-family: "Snell Roundhand", cursive;
+            color: white;
         }
 
         button {
@@ -58,50 +58,38 @@
             color: #3b5110;
         }
 
-        /* Estilo para o botão customizado */
         .custom-file-input {
             padding: 12px 20px;
             font-size: 14px;
             cursor: pointer;
             border: none;
-            background-color: #e2e8e2;; /* Cor de fundo */
-            color: #3b5110; /* Cor do texto */
+            background-color: #e2e8e2;
+            color: #3b5110;
             border-radius: 5px;
         }
 
-        /* Esconde o input de tipo file, mas ainda funciona */
         #fileInput {
             display: none;
         }
 
-        /* Exibe a quantidade de arquivos selecionados */
         #fileCount {
             font-size: 12px;
             margin-top: 10px;
             color: #7e9a7b;
         }
-
     </style>
 </head>
 <body>
     <h3>Partilha connosco a magia deste dia!</h3>
-    <p></p>
     <h5>O dia é nosso, mas as memórias são de todos! Envia as tuas fotos para que possamos reviver cada momento!</h5>
-    <p></p>
 
-    <!-- Botão personalizado para acionar o seletor de arquivos -->
     <button class="custom-file-input" onclick="document.getElementById('fileInput').click()">Escolher Ficheiros</button>
-
-    <!-- Input de arquivo oculto -->
     <input type="file" id="fileInput" multiple onchange="updateFileCount()">
-
-    <!-- Exibe a quantidade de arquivos selecionados -->
     <div id="fileCount">Nenhum arquivo selecionado.</div>
 
     <button onclick="uploadFiles()">Enviar</button>
 
     <script>
-        // Função para atualizar o contador de arquivos selecionados
         function updateFileCount() {
             const fileInput = document.getElementById("fileInput");
             const fileCount = fileInput.files.length;
@@ -123,7 +111,6 @@
 
             for (const file of fileInput.files) {
                 const reader = new FileReader();
-                
                 const filePromise = new Promise((resolve) => {
                     reader.onloadend = function () {
                         filesArray.push({
